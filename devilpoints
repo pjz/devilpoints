@@ -1,0 +1,103 @@
+#!/bin/python
+
+import math
+
+input = [
+    [ 'Fluxx', { 'Steve': 4, 'RussD': -1, 'RussW': -1, 'JamesK': -1, 'Fina': -1 } ],
+    [ 'GhostParty', { 'Fina': 1, 'JamesK': -1 } ],
+    [ 'PuertoRico', { 'Daniel': 4, 'JP': 2 , 'Dan': 0, 'MarkH': -2, 'Whendy': -4 } ],
+    [ 'Babel', { 'JeffF': 1, 'Clayton': -1 } ],
+    [ 'Drakon', { 'RussD': 5, 'JonathanC': 2, 'William': 2, 'JimG': -2, 'Steve': -2, 'RussW': -5 } ],
+    [ 'CantStop', { 'William': 2, 'JonathanC': 0, 'JimG': -2 }],
+    [ 'Carcasonne', { 'Steve': 3, 'RussD':1, 'RussW': -1, 'JeffF': -3 } ],
+    [ 'PigPile', { 'JP': 3, 'Daniel':1 , 'MarkH': -2, 'Dan': -2 } ],
+    [ 'WebOfPower', { 'JP':3, 'JeffF': 1, 'Steve': -1, 'RussW': -3 } ],
+    [ 'Settlers', { 'RussW': 2, 'JeffF': -1, 'JP': -1 } ]
+]
+
+
+
+#def compute_oldstyle_devilpoints(input):
+#    opponentsof = {}
+#    rdp = {} # rank devil points
+#    wdp = {} # win devil points
+#    for ( game, players ) in input:
+#        winscore = max(players.values())
+#        numplayers = len(players)
+#        winners = len([ x for x in players.values() if x == winscore ])
+#        for player, score in players:
+#            opponentsof[player] = opponentsof.get(player, 0) + numplayers
+#            rdp[player] = rdp.get(player, 0) + score
+#            if score == winscore:
+#                wdp[player] = wdp.get(player, 0) + score
+#            else:
+#                wdp[player] = wdp.get(player, 0) - winners
+#    for player, opponents in opponentsof:
+#        rdp[player] = rdp[player] / opponents 
+#        wdp[player] = wdp[player] / opponents 
+#    return rdp, wdp
+
+
+def compute_newstyle_devilpoints(input):
+    rdp = {} # rank devil points
+    wdp = {} # win devil points
+    plays = {} # number of games played
+    wins = {}  # number of games won
+    for game, players in input:
+        print "DEBUG >>> %s" % repr(players)
+        numplayers = len(players)
+        winscore = max(players.values())
+        for player, score in players.items():
+            plays[player] = plays.get(player, 0) + 1
+            aswell = len([ x for x in players.values() if x >= score])
+            aspoor = len([ x for x in players.values() if x <= score])
+            rdp[player] = rdp.get(player, 1.0) * aspoor / aswell 
+            if score != winscore:
+                aswell = numplayers
+                aspoor = len([ x for x in players.values() if x < winscore])
+            else:
+                wins[player] = wins.get(player, 0) + 1
+            wdp[player] = wdp.get(player, 1.0) * aspoor / aswell 
+    for player in rdp:
+        rdp[player] = math.log(rdp[player]) 
+        wdp[player] = math.log(wdp[player])
+        wins[player] = wins.get(player, 0) 
+    return rdp, wdp, plays, wins
+
+
+def sorted_byval(d):
+   def valcmp(x, y):
+      return cmp(y[1], x[1])
+   i = d.items() 
+   i.sort(valcmp)
+   return i
+
+
+if __name__ == '__main__':
+    
+    rank, win, plays, wins = compute_newstyle_devilpoints(input)
+    totalgamesplayed = len(input)
+    players = len(rank)
+
+    print "%d players played %d games " % (players, totalgamesplayed)
+    rank = sorted_byval(rank)
+    win = sorted_byval(win)
+
+    for i in range(players):
+        rankname = rank[i][0]
+        winname = win[i][0]
+        info = {
+            'rankscore' : rank[i][1],
+            'rankname' : rankname,
+            'rankplayed' : plays[rankname],
+            'winscore' : win[i][1],
+            'winname' : winname,
+            'winwins' : wins[winname],
+            'winplayed' : plays[winname]
+        }
+        print "%(rankscore)2.4f %(rankname)s (%(rankplayed)d)    " % info,
+        print "%(winscore)2.4f %(winname)s won %(winwins)d of %(winplayed)d" % info 
+
+
+
+
