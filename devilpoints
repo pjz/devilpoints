@@ -16,28 +16,6 @@ input = [
 ]
 
 
-
-#def compute_oldstyle_devilpoints(input):
-#    opponentsof = {}
-#    rdp = {} # rank devil points
-#    wdp = {} # win devil points
-#    for ( game, players ) in input:
-#        winscore = max(players.values())
-#        numplayers = len(players)
-#        winners = len([ x for x in players.values() if x == winscore ])
-#        for player, score in players:
-#            opponentsof[player] = opponentsof.get(player, 0) + numplayers
-#            rdp[player] = rdp.get(player, 0) + score
-#            if score == winscore:
-#                wdp[player] = wdp.get(player, 0) + score
-#            else:
-#                wdp[player] = wdp.get(player, 0) - winners
-#    for player, opponents in opponentsof:
-#        rdp[player] = rdp[player] / opponents 
-#        wdp[player] = wdp[player] / opponents 
-#    return rdp, wdp
-
-
 def compute_newstyle_devilpoints(input):
     rdp = {} # rank devil points
     wdp = {} # win devil points
