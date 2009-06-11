@@ -1,15 +1,17 @@
 #!/bin/python
 
+from __future__ import print_function
+
 import sys
 import math
 
 def noop(*args):
     pass
 
-def dprint(string):
-    print("DEBUG >>> ", string)
+def debug(string):
+    print("DEBUG >>> {0}".format(string))
 
-debug=dprint
+debug=noop
 
 def compute_newstyle_devilpoints(input):
     rdp = {} # rank devil points
@@ -49,21 +51,33 @@ def sorted_byval(d):
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
-        print """Usage: %s <inputfile>"""
+        print("Usage: {0[0]} <inputfile>".format(sys.argv))
         sys.exit(1)
 
     inputfile = sys.argv[1]
-    print("Processing %s..." % inputfile)
+    print("Processing {0}...".format(inputfile))
     inputtext = "".join(open(inputfile).readlines())
     input = eval(inputtext)
-    debug("input:\n%s" % repr(input))
+    debug("input:\n{0!r}".format(input))
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
     totalgamesplayed = len(input)
     players = len(rank)
 
-    print "%d players played %d games " % (players, totalgamesplayed)
+    print("{0} players played {1} games ".format(players, totalgamesplayed))
     rank = sorted_byval(rank)
     win = sorted_byval(win)
+    
+    maxnamelen = max([len(entry[0]) for entry in rank])
+    fmtstr = ("{0[rankscore]:> 2.4f} " +
+        "{0[rankname]:>" + str(maxnamelen) + "s} " +
+        "({0[rankplayed]:d}) " +
+        "{0[winscore]:> 2.4f} " +
+        "{0[winname]:>" + str(maxnamelen) + "s} won " +
+        "{0[winwins]:d} of " +
+        "{0[winplayed]:d}. ")
+
+    #10+maxnamelen = 7 + 1 + maxnamelen + 1 + 3 + 1 - 4 
+    print("Rank"," "*(10+maxnamelen),"Win",sep='')
 
     for i in range(players):
         rankname = rank[i][0]
@@ -77,9 +91,5 @@ if __name__ == '__main__':
             'winwins' : wins[winname],
             'winplayed' : plays[winname]
         }
-        print "%(rankscore)2.4f %(rankname)s (%(rankplayed)d)    " % info,
-        print "%(winscore)2.4f %(winname)s won %(winwins)d of %(winplayed)d" % info 
-
-
-
+        print(fmtstr.format(info))
 
