@@ -54,10 +54,15 @@ if __name__ == '__main__':
         print("Usage: {0[0]} <inputfile>".format(sys.argv))
         sys.exit(1)
 
-    inputfile = sys.argv[1]
-    print("Processing {0}...".format(inputfile))
-    inputtext = "".join(open(inputfile).readlines())
-    input = eval(inputtext)
+    inputfiles = sys.argv[1:]
+    input = []
+    for inputfile in inputfiles:
+        print("Loading {0}...".format(inputfile))
+        inputtext = "".join(open(inputfile).readlines())
+        input += eval(inputtext)
+
+    print("Processing {0}...".format("+".join(inputfiles)))
+
     debug("input:\n{0!r}".format(input))
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
     totalgamesplayed = len(input)
