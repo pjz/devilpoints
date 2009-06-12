@@ -40,13 +40,25 @@ def compute_newstyle_devilpoints(input):
     return rdp, wdp, plays, wins
 
 
+def sorted_by_subentry(l, entry):
+    """sort a list of tuples by their (entry-1)'th entry"""
+    def valcmp(x, y):
+        return cmp(x[entry], y[entry])
+    c = l[:]
+    c.sort(valcmp)
+    return c   
+
+
 def sorted_byval(d):
    """sort a list of tuples by their 2nd entries"""
-   def valcmp(x, y):
-      return cmp(y[1], x[1])
-   i = d.items() 
-   i.sort(valcmp)
-   return i
+   return sorted_by_subentry(d.items(), 1)
+
+
+def reversed(l):
+    """reverse a list"""
+    c = l[:]
+    c.reverse()
+    return c
 
 
 def load_files(inputfiles):
@@ -68,8 +80,8 @@ def load_files(inputfiles):
 def print_devil_rankings(rank, win, plays, wins):
     """Output nicely formatted devilpoint rank and winrank tables"""
     playercount = len(rank)
-    rank = sorted_byval(rank)
-    win = sorted_byval(win)
+    rank = reversed(sorted_byval(rank))
+    win = reversed(sorted_byval(win))
     maxnamelen = max([len(entry[0]) for entry in rank])
     namefmt = ">" + str(maxnamelen) + "s"
     maxplayedlen = max([len(str(x)) for x in plays.values()])
@@ -101,8 +113,9 @@ def print_devil_rankings(rank, win, plays, wins):
 def print_all_games(inputdata):
    maxgamelen = max([len(play[0]) for play in inputdata])
    gamefmt = "{0:>" + str(maxgamelen) + "s} :: "
-   for game, players in inputdata:
-       playerstr = ", ".join([ k+": "+str(v) for k, v in players.items() ])
+   for game, players in sorted_by_subentry(inputdata, 0):
+       scores = reversed(sorted_byval(players))
+       playerstr = ", ".join([ k+": "+str(v) for k, v in scores ])
        print(gamefmt.format(game) + playerstr)
        
 
