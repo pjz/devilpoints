@@ -130,13 +130,15 @@ if __name__ == '__main__':
     inputfiles = sys.argv[1:]
     input = load_files(inputfiles)
 
-    print("Processing {0}...".format("+".join(inputfiles)))
+    print("Processing {0}...\n".format("+".join(inputfiles)))
 
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
 
-    print("{0} players played {1} games ".format(len(rank), len(input)))
+    print("{0} players played {1} games.\n".format(len(rank), len(input)))
 
     print_all_games(input)
+
+    print("")
 
     print("Rankings...")
 
