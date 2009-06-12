@@ -98,6 +98,15 @@ def print_devil_rankings(rank, win, plays, wins):
         }
         print(fmtstr.format(**info))
 
+def print_all_games(inputdata):
+   maxgamelen = max([len(play[0]) for play in inputdata])
+   gamefmt = "{0:>" + str(maxgamelen) + "s} :: "
+   for game, players in inputdata:
+       playerstr = ", ".join([ k+": "+str(v) for k, v in players.items() ])
+       print(gamefmt.format(game) + playerstr)
+       
+
+
 
 if __name__ == '__main__':
 
@@ -113,6 +122,10 @@ if __name__ == '__main__':
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
 
     print("{0} players played {1} games ".format(len(rank), len(input)))
+
+    print_all_games(input)
+
+    print("Rankings...")
 
     print_devil_rankings(rank, win, plays, wins)
 
