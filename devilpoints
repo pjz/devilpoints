@@ -85,9 +85,10 @@ def print_devil_rankings(rank, win, plays, wins):
     maxnamelen = max([len(entry[0]) for entry in rank])
     namefmt = ">" + str(maxnamelen) + "s"
     maxplayedlen = max([len(str(x)) for x in plays.values()])
+    playedfmt = ">" + str(maxplayedlen) +"d"
     fmtstr = ("{rankscore:> 2.4f} " +
         "{rankname:" + namefmt + "} " +
-        "({rankplayed:d}) " +
+        "({rankplayed:" + playedfmt + "}) " +
         "{winscore:> 2.4f} " +
         "{winname:" + namefmt + "} won " +
         "{winwins:d} of " +
