@@ -134,21 +134,26 @@ def cmd_rank(input):
 def cmd_games(input):
 
     plays = {}
+    total = 0
     for game, players in input:
         plays[game] = plays.get(game,0) + 1 
+        total += 1
   
     maxplaystrlen = len(str(max(plays.values()))) 
     gamefmt = "{0:>" + str(maxplaystrlen) + "} {1}"
     debug("gamefmt = " + gamefmt)
+
+    print("{0} plays of {1} games:\n".format(total,len(plays)))
     for game, playcount in reversed(sorted_byval(plays)):
         print(gamefmt.format(playcount,game))
+
+
+
 
 cmdlist = {
 	"score" : cmd_rank,
 	"games": cmd_games
 	}
-
-
 
 if __name__ == '__main__':
 
