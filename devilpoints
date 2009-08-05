@@ -111,6 +111,7 @@ def print_devil_rankings(rank, win, plays, wins):
         }
         print(fmtstr.format(**info))
 
+
 def print_all_games(inputdata):
    maxgamelen = max([len(play[0]) for play in inputdata])
    gamefmt = "{0:>" + str(maxgamelen) + "s} :: "
@@ -118,30 +119,53 @@ def print_all_games(inputdata):
        scores = reversed(sorted_byval(players))
        playerstr = ", ".join([ k+": "+str(v) for k, v in scores ])
        print(gamefmt.format(game) + playerstr)
+
        
+def cmd_rank(input):
+    rank, win, plays, wins = compute_newstyle_devilpoints(input)
+
+    print("{0} players played {1} games.\n".format(len(rank), len(input)))
+    print_all_games(input)
+
+    print("\nRankings...")
+    print_devil_rankings(rank, win, plays, wins)
+
+
+def cmd_games(input):
+
+    plays = {}
+    for game, players in input:
+        plays[game] = plays.get(game,0) + 1 
+  
+    maxplaystrlen = len(str(max(plays.values()))) 
+    gamefmt = "{0:>" + str(maxplaystrlen) + "} {1}"
+    debug("gamefmt = " + gamefmt)
+    for game, playcount in reversed(sorted_byval(plays)):
+        print(gamefmt.format(playcount,game))
+
+cmdlist = {
+	"score" : cmd_rank,
+	"games": cmd_games
+	}
 
 
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 2:
-        print("Usage: {0[0]} <inputfile>".format(sys.argv))
+    cmds = cmdlist.keys()
+    if len(sys.argv) < 3:
+        print("Usage: {0[0]} [{1}] <inputfile>".format(sys.argv, "|".join(cmds)))
         sys.exit(1)
 
-    inputfiles = sys.argv[1:]
+    cmd = sys.argv[1]
+    if cmd not in cmds:
+	print("Valid commands are: {0}".format(", ".join(cmds)))
+        sys.exit(1)
+
+    inputfiles = sys.argv[2:]
     input = load_files(inputfiles)
 
     print("Processing {0}...\n".format("+".join(inputfiles)))
 
-    rank, win, plays, wins = compute_newstyle_devilpoints(input)
-
-    print("{0} players played {1} games.\n".format(len(rank), len(input)))
-
-    print_all_games(input)
-
-    print("")
-
-    print("Rankings...")
-
-    print_devil_rankings(rank, win, plays, wins)
+    cmdlist[cmd](input)
 
