@@ -41,12 +41,17 @@ def compute_newstyle_devilpoints(input):
 
 
 def sorted_by_subentry(l, entry):
-    """sort a list of tuples by their (entry-1)'th entry"""
+    """sort a list of tuples by their (entry+1)'th entry"""
     def valcmp(x, y):
         return cmp(x[entry], y[entry])
     c = l[:]
     c.sort(valcmp)
     return c   
+
+
+def sorted_bykey(d):
+   """sort a list of tuples by their 1st entry"""
+   return sorted_by_subentry(d.items(), 0)
 
 
 def sorted_byval(d):
@@ -138,21 +143,42 @@ def cmd_games(input):
     for game, players in input:
         plays[game] = plays.get(game,0) + 1 
         total += 1
+
+    print("{0} plays of {1} games:\n".format(total,len(plays)))
   
     maxplaystrlen = len(str(max(plays.values()))) 
     gamefmt = "{0:>" + str(maxplaystrlen) + "} {1}"
     debug("gamefmt = " + gamefmt)
 
-    print("{0} plays of {1} games:\n".format(total,len(plays)))
     for game, playcount in reversed(sorted_byval(plays)):
         print(gamefmt.format(playcount,game))
 
 
+def cmd_players(input):
+
+    allplayers = {}
+    total = 0
+    pg = 0
+    for game, players in input:
+        for player in players.keys():
+            allplayers[player] = allplayers.get(player,0) + 1
+            pg += 1
+        total += 1
+
+    headermsg = "{0} players played {1} games, averaging {2:> 2.4f} players/game\n"
+    print(headermsg.format(len(allplayers), total, pg / total))
+
+    maxplaystrlen = len(str(max(allplayers.values())))
+    playerfmt = "{0:>" + str(maxplaystrlen) + "} {1}"
+
+    for player, plays in sorted_bykey(allplayers):
+        print(playerfmt.format(plays, player))
 
 
 cmdlist = {
 	"score" : cmd_rank,
-	"games": cmd_games
+	"games": cmd_games,
+	"players": cmd_players
 	}
 
 if __name__ == '__main__':
