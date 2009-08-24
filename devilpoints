@@ -165,8 +165,8 @@ def cmd_players(input):
             pg += 1
         total += 1
 
-    headermsg = "{0} players played {1} games, averaging {2:> 2.4f} players/game\n"
-    print(headermsg.format(len(allplayers), total, pg / total))
+    headermsg = "{0} players played {1} games, averaging {2:>.4f} players/game\n"
+    print(headermsg.format(len(allplayers), total, 1.0 * pg / total))
 
     maxplaystrlen = len(str(max(allplayers.values())))
     playerfmt = "{0:>" + str(maxplaystrlen) + "} {1}"
