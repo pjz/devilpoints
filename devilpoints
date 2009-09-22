@@ -5,6 +5,8 @@ from __future__ import print_function
 import sys
 import math
 
+from opster import command, dispatch
+
 def noop(*args):
     pass
 
@@ -66,16 +68,16 @@ def reversed(l):
     return c
 
 
-def load_files(inputfiles):
+def load_files(inputfiles, incfmt='.'):
     """Load the specified list of files as input files.
        Input files are python/json declarations of a list
        of tuples, where the first item in the tuple is the name
        of the game that was played and the second item is a 
-       dictionary of player: devilpoints score
+       dictionary of { player: devilpoints score, ... }
     """
     input = []
     for inputfile in inputfiles:
-        print("Loading {0}...".format(inputfile))
+        print(incfmt.format(inputfile),end='')
         inputtext = "".join(open(inputfile).readlines())
         input += eval(inputtext)
     debug("input:\n{0!r}".format(input))
@@ -125,8 +127,25 @@ def print_all_games(inputdata):
        playerstr = ", ".join([ k+": "+str(v) for k, v in scores ])
        print(gamefmt.format(game) + playerstr)
 
+
+def process_or_error(inputfiles, msgfmt="Processing {0}...\n"):
+    if len(inputfiles) < 1:
+        print("Error: at least one input file must be specified.\n")
+        sys.exit(1)
+    print(msgfmt.format("+".join(inputfiles)),end='')
+    input = load_files(inputfiles,'')
+    return input
+
        
-def cmd_rank(input):
+@command(usage=('%name INPUTFILES'))
+def score(*inputfiles):
+    '''Compute place and win rankings
+
+    Compute the probability-based place and win rankings for the specified input files.
+    '''
+
+    input = process_or_error(inputfiles)
+
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
 
     print("{0} players played {1} games.\n".format(len(rank), len(input)))
@@ -136,7 +155,14 @@ def cmd_rank(input):
     print_devil_rankings(rank, win, plays, wins)
 
 
-def cmd_games(input):
+@command(usage=('%name INPUTFILES'))
+def games(*inputfiles):
+    '''Show all the games and how often they were played
+
+    Give full details on what games are in the specified input files.
+    '''
+
+    input = process_or_error(inputfiles)
 
     plays = {}
     total = 0
@@ -154,7 +180,14 @@ def cmd_games(input):
         print(gamefmt.format(playcount,game))
 
 
-def cmd_players(input):
+@command(usage=('%name INPUTFILES'))
+def players(*inputfiles):
+    '''Show all the players and how often they played
+
+    Give full details on what players are in the specified input files.
+    '''
+
+    input = process_or_error(inputfiles)
 
     allplayers = {}
     total = 0
@@ -175,28 +208,54 @@ def cmd_players(input):
         print(playerfmt.format(plays, player))
 
 
-cmdlist = {
-	"score" : cmd_rank,
-	"games": cmd_games,
-	"players": cmd_players
-	}
+@command(usage=('%name NEWFILE OLDFILES...'))
+def new_players(newfile, *oldfiles):
+    '''Show any new players in newfile
+
+    Compare the players in newfile to the players in oldfiles, and list any new players.  Useful to verify that you didn't typo a name.
+    '''
+
+    oldinput = process_or_error(oldfiles, "Loading {0}...")
+    print("\nLoading new file",end='')
+    newinput = load_files([newfile],'...\n')
+
+    allplayers = set()
+    for game, players in oldinput:
+        allplayers.update(set(players.keys()))
+
+    newplayers = set()
+    for game, players in newinput:
+        newplayers.update(set(players.keys()).difference(allplayers))
+
+    print("{0} new players:\n".format(len(newplayers)))
+    maxplayerstrlen = max(len(str(p)) for p in newplayers)
+    playerfmt = "{0:>" + str(maxplayerstrlen) + "}"
+    for player in newplayers:
+        print(playerfmt.format(player))
+
+
+@command(usage=('%name NEWFILE OLDFILES...'))
+def new_games(newfile, *oldfiles):
+    '''Show any new games in newfile
+
+    Compare the games in newfile to the games in oldfiles, and list any new games.  Useful to verify that you didn't typo a name.
+    '''
+
+    oldinput = process_or_error(oldfiles, "Loading {0}...")
+    print("\nLoading new file",end='')
+    newinput = load_files([newfile],'...\n')
+
+    all = set([ game for game,p in oldinput ])
+    new = set([ game for game,p in newinput if not game in all ])
+
+    print("{0} new games:\n".format(len(new)))
+    maxstrlen = max(len(str(p)) for p in new)
+    fmt = "{0:>" + str(maxstrlen) + "}"
+    for item in new:
+        print(fmt.format(item))
+    
+
 
 if __name__ == '__main__':
-
-    cmds = cmdlist.keys()
-    if len(sys.argv) < 3:
-        print("Usage: {0[0]} [{1}] <inputfile>".format(sys.argv, "|".join(cmds)))
-        sys.exit(1)
-
-    cmd = sys.argv[1]
-    if cmd not in cmds:
-	print("Valid commands are: {0}".format(", ".join(cmds)))
-        sys.exit(1)
-
-    inputfiles = sys.argv[2:]
-    input = load_files(inputfiles)
-
-    print("Processing {0}...\n".format("+".join(inputfiles)))
-
-    cmdlist[cmd](input)
+    dispatch()
 
