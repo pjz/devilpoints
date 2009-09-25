@@ -1,12 +1,12 @@
+
 [
-    [ 'Fluxx', { 'Steve': 4, 'RussD': -1, 'RussW': -1, 'JamesK': -1, 'Fina': -1 } ],
-    [ 'GhostParty', { 'Fina': 1, 'JamesK': -1 } ],
-    [ 'PuertoRico', { 'Daniel': 4, 'JP': 2 , 'Dan': 0, 'MarkH': -2, 'Whendy': -4 } ],
-    [ 'Babel', { 'JeffF': 1, 'Clayton': -1 } ],
-    [ 'Drakon', { 'RussD': 5, 'JonathanC': 2, 'William': 2, 'JimG': -2, 'Steve': -2, 'RussW': -5 } ],
-    [ 'CantStop', { 'William': 2, 'JonathanC': 0, 'JimG': -2 }],
-    [ 'Carcasonne', { 'Steve': 3, 'RussD':1, 'RussW': -1, 'JeffF': -3 } ],
-    [ 'PigPile', { 'JP': 3, 'Daniel':1 , 'MarkH': -2, 'Dan': -2 } ],
-    [ 'WebOfPower', { 'JP':3, 'JeffF': 1, 'Steve': -1, 'RussW': -3 } ],
-    [ 'Settlers', { 'RussW': 2, 'JeffF': -1, 'JP': -1 } ]
+['DenOfThieves', { 'MarkY':3, 'Matt':1, 'ChrisH':-1, 'Carly':-3 }],
+['alhambra', { 'MarkH':5, 'RussW':3, 'Whendy':1, 'Ben':-1, 'Clayton':-3, 'JP':-5 }],
+['Rummikub', { 'Whendy':2, 'RussW':0, 'MarkH':-2 }],
+['CantStop', { 'JP':2, 'Clayton':-1, 'Ben':-1 }],
+['NewEngland', { 'MarkY':3, 'Matt':-3, 'ChrisH':1, 'Carly':-1 }],
+['DenOfThieves', { 'Matt':3, 'RussW':1, 'William':-1, 'JP':-3 }],
+['alhambra', { 'JP':5, 'Marty':3, 'William':1, 'RussW':-1, 'Matt':-3, 'MarkY':-5 }],
 ]
+
+# this is from http://russcon.org/RussCon/2003/1105.html

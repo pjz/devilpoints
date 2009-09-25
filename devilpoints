@@ -11,15 +11,15 @@ def noop(*args):
     pass
 
 def debug(string):
-    print("DEBUG >>> {0}".format(string))
+    print("##DEBUG >>> {0}".format(string))
 
 debug=noop
 
 def compute_newstyle_devilpoints(input):
-    rdp = {} # rank devil points
-    wdp = {} # win devil points
-    plays = {} # number of games played
-    wins = {}  # number of games won
+    rdp = {} # rank devil points per-player
+    wdp = {} # win devil points per-player
+    plays = {} # number of games played per-player
+    wins = {}  # number of games won per-player
     for game, players in input:
         debug(repr(players))
         numplayers = len(players)
@@ -42,23 +42,23 @@ def compute_newstyle_devilpoints(input):
     return rdp, wdp, plays, wins
 
 
-def sorted_by_subentry(l, entry):
+def sorted_by_subentry(l, entry, mycmp=cmp):
     """sort a list of tuples by their (entry+1)'th entry"""
     def valcmp(x, y):
-        return cmp(x[entry], y[entry])
+        return mycmp(x[entry], y[entry])
     c = l[:]
     c.sort(valcmp)
     return c   
 
 
-def sorted_bykey(d):
+def sorted_bykey(d, mycmp=cmp):
    """sort a list of tuples by their 1st entry"""
-   return sorted_by_subentry(d.items(), 0)
+   return sorted_by_subentry(d.items(), 0,mycmp=mycmp)
 
 
-def sorted_byval(d):
-   """sort a list of tuples by their 2nd entries"""
-   return sorted_by_subentry(d.items(), 1)
+def sorted_byval(d, mycmp=cmp):
+   """sort a dictionary by its values, return a sorted items() list"""
+   return sorted_by_subentry(d.items(), 1, mycmp=mycmp)
 
 
 def reversed(l):
@@ -253,7 +253,79 @@ def new_games(newfile, *oldfiles):
     fmt = "{0:>" + str(maxstrlen) + "}"
     for item in new:
         print(fmt.format(item))
-    
+
+
+def competed(raw, winner, loser):
+    '''did winner ever directly play a game with loser?'''
+    for game, players in raw:
+        if winner in players and loser in players:
+            debug("competed({0},{1}) -> True".format(winner,loser))
+            return True
+    debug("competed({0},{1}) -> False".format(winner,loser))
+    return False 
+
+def downstream(d, node):
+    '''d is a dictionary of lists
+       n is the node name
+       returns the set of all nodes in d's list catenated with
+         the set of all those nodes' subnodes ad infinitum
+    '''
+    debug("downstream({0},{1})".format(repr(d), node))
+    result = set(d[node])
+    for n in d[node]:
+        result.update(downstream(d, n))
+    debug(" => " + repr(result)) 
+    return result
+
+def minimize(d):
+    '''minimized directed graph d'''
+    # take out direct relationships that could be indirect
+    for node in d:
+        allsubs = [ set(downstream(d, n)) for n in d[node] ]
+        allsubs = set([]).union(*allsubs)
+        debug("allsubs({0}): {1}".format(node,repr(allsubs)))
+        d[node] = set(d[node]).difference(allsubs)
+    return d
+
+@command(usage=('%name graph INPUTFILES'))
+def graph(*inputfiles):
+    '''Produce input to feed to graphviz
+
+    Produce input to feed to graphviz to graph rankings
+    '''
+
+    input = process_or_error(inputfiles,"# Processing {0}...\n")
+
+    rank, win, plays, wins = compute_newstyle_devilpoints(input)
+    players = rank.keys()
+
+    # construct the directed graph
+    result = dict([(x,[]) for x in players])
+    for aplayer in players:
+        for bplayer in players:
+            status = cmp(rank[aplayer], rank[bplayer]) + \
+                     cmp(win[aplayer], win[bplayer])
+            if status == 0:
+                continue
+            if status > 0: 
+                winner, loser = aplayer, bplayer
+            elif status < 0:
+                winner, loser = bplayer, aplayer
+            if loser not in result[winner]:
+                result[winner].append( loser )
+
+    result = minimize(result)
+
+    debug("#result: " + repr(result))
+
+    # output the graph
+    print("digraph A {")
+
+    for winner in result:
+        for loser in result[winner]:
+            print(' "{0}"->"{1}" ;'.format(winner, loser))
+
+    print("}")
 
 
 if __name__ == '__main__':
