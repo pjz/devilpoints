@@ -227,6 +227,10 @@ def new_players(newfile, *oldfiles):
     for game, players in newinput:
         newplayers.update(set(players.keys()).difference(allplayers))
 
+    if len(newplayers) == 0:
+        print("No new players.")
+        return
+
     print("{0} new players:\n".format(len(newplayers)))
     maxplayerstrlen = max(len(str(p)) for p in newplayers)
     playerfmt = "{0:>" + str(maxplayerstrlen) + "}"
@@ -247,6 +251,10 @@ def new_games(newfile, *oldfiles):
 
     all = set([ game for game,p in oldinput ])
     new = set([ game for game,p in newinput if not game in all ])
+
+    if len(new) == 0:
+        print("No new games.")
+        return
 
     print("{0} new games:\n".format(len(new)))
     maxstrlen = max(len(str(p)) for p in new)
