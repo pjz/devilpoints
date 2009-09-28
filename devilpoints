@@ -45,7 +45,14 @@ def compute_newstyle_devilpoints(input):
 def sorted_by_subentry(l, entry, mycmp=cmp):
     """sort a list of tuples by their (entry+1)'th entry"""
     def valcmp(x, y):
-        return mycmp(x[entry], y[entry])
+        if type(entry) != type([]):
+            return mycmp(x[entry], y[entry])
+        else:
+            for i in entry:
+                result = mycmp(x[i], y[i])
+                if result != 0:
+                    return result
+            return 0
     c = l[:]
     c.sort(valcmp)
     return c   
@@ -176,7 +183,8 @@ def games(*inputfiles):
     gamefmt = "{0:>" + str(maxplaystrlen) + "} {1}"
     debug("gamefmt = " + gamefmt)
 
-    for game, playcount in reversed(sorted_byval(plays)):
+    gamelist = reversed(sorted_by_subentry(plays.items(), [1, 0]))
+    for game, playcount in gamelist:
         print(gamefmt.format(playcount,game))
 
 
