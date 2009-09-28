@@ -1,0 +1,5 @@
+#!/bin/sh
+files=`ls 09* | sort -rn`
+
+./devilpoints new-players $files
+./devilpoints new-games $files
