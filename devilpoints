@@ -183,7 +183,7 @@ def games(*inputfiles):
     gamefmt = "{0:>" + str(maxplaystrlen) + "} {1}"
     debug("gamefmt = " + gamefmt)
 
-    gamelist = reversed(sorted_by_subentry(plays.items(), [1, 0]))
+    gamelist = sorted_by_subentry(plays.items(), [1, 0])
     for game, playcount in gamelist:
         print(gamefmt.format(playcount,game))
 
