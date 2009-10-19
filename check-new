@@ -1,5 +1,5 @@
 #!/bin/sh
-files=`ls 09* | sort -rn`
+files=`find sessions/ -type f | sort -rn`
 
 ./devilpoints new-players $files
 ./devilpoints new-games $files
