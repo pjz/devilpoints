@@ -10,8 +10,9 @@ from opster import command, dispatch
 def noop(*args):
     pass
 
-def debug(string):
-    print("##DEBUG >>> {0}".format(string))
+def debug(stringfunc):
+    for line in stringfunc():
+        print("##DEBUG >>> {0}".format(line))
 
 debug=noop
 
@@ -21,7 +22,7 @@ def compute_newstyle_devilpoints(input):
     plays = {} # number of games played per-player
     wins = {}  # number of games won per-player
     for game, players in input:
-        debug(repr(players))
+        debug(lambda : repr(players))
         numplayers = len(players)
         winscore = max(players.values())
         for player, score in players.items():
@@ -87,7 +88,7 @@ def load_files(inputfiles, incfmt='.'):
         print(incfmt.format(inputfile),end='')
         inputtext = "".join(open(inputfile).readlines())
         input += eval(inputtext)
-    debug("input:\n{0!r}".format(input))
+    debug(lambda : "input:\n{0!r}".format(input))
     return input
 
 
@@ -181,7 +182,7 @@ def games(*inputfiles):
   
     maxplaystrlen = len(str(max(plays.values()))) 
     gamefmt = "{0:>" + str(maxplaystrlen) + "} {1}"
-    debug("gamefmt = " + gamefmt)
+    debug(lambda : "gamefmt = " + gamefmt)
 
     gamelist = sorted_by_subentry(plays.items(), [1, 0])
     for game, playcount in gamelist:
@@ -275,9 +276,9 @@ def competed(raw, winner, loser):
     '''did winner ever directly play a game with loser?'''
     for game, players in raw:
         if winner in players and loser in players:
-            debug("competed({0},{1}) -> True".format(winner,loser))
+            debug(lambda : "competed({0},{1}) -> True".format(winner,loser))
             return True
-    debug("competed({0},{1}) -> False".format(winner,loser))
+    debug(lambda : "competed({0},{1}) -> False".format(winner,loser))
     return False 
 
 def downstream(d, node):
@@ -286,11 +287,11 @@ def downstream(d, node):
        returns the set of all nodes in d's list catenated with
          the set of all those nodes' subnodes ad infinitum
     '''
-    debug("downstream({0},{1})".format(repr(d), node))
     result = set(d[node])
+    debug(lambda : "downstream({0},{1})".format(repr(d), node))
     for n in d[node]:
         result.update(downstream(d, n))
-    debug(" => " + repr(result)) 
+        debug(lambda : " => " + repr(result)) 
     return result
 
 def minimize(d):
@@ -299,7 +300,7 @@ def minimize(d):
     for node in d:
         allsubs = [ set(downstream(d, n)) for n in d[node] ]
         allsubs = set([]).union(*allsubs)
-        debug("allsubs({0}): {1}".format(node,repr(allsubs)))
+        debug(lambda : "allsubs({0}): {1}".format(node,repr(allsubs)))
         d[node] = set(d[node]).difference(allsubs)
     return d
 
@@ -332,7 +333,7 @@ def graph(*inputfiles):
 
     result = minimize(result)
 
-    debug("#result: " + repr(result))
+    debug(lambda : "#result: " + repr(result))
 
     # output the graph
     print("digraph A {")
