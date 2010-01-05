@@ -11,10 +11,13 @@ def noop(*args):
     pass
 
 def debug(stringfunc):
-    for line in stringfunc():
+    result = stringfunc()
+    if type(result) == type(""):
+        result = [ result ]
+    for line in result:
         print("##DEBUG >>> {0}".format(line))
 
-debug=noop
+#debug=noop
 
 def compute_newstyle_devilpoints(input):
     rdp = {} # rank devil points per-player
