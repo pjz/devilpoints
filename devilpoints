@@ -17,7 +17,7 @@ def debug(stringfunc):
     for line in result:
         print("##DEBUG >>> {0}".format(line))
 
-#debug=noop
+debug=noop
 
 def compute_newstyle_devilpoints(input):
     rdp = {} # rank devil points per-player
@@ -88,6 +88,7 @@ def load_files(inputfiles, incfmt='.'):
     """
     input = []
     for inputfile in inputfiles:
+        debug(lambda : "Loading file '{0}'".format(inputfile))
         print(incfmt.format(inputfile),end='')
         inputtext = "".join(open(inputfile).readlines())
         input += eval(inputtext)
