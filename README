@@ -1,0 +1,13 @@
+devilpoints
+-----------
+
+WHO:
+Paul Jimenez aka pjz
+
+WHAT:
+'Devilpoints' is a kind of meta-ranking system devised by a bunch of gamers starting in about 1998.  The full story is at http://russcon.org/RussCon/devilpoints.html with the updated 2002 version explained at http://russcon.org/RussCon/ratings.html.  
+
+WHY:
+This version came into being because RussCon went away and I when I started my own game group, I wanted to revive the practice.  I was, however, without whatever software Russ used to compute these numbers (rumoredly some kind of spreadsheet), but I knew where the descriptions above were, so I set out to make my own.  I then tested it against some known-good data and proceeded to use it for around six months before publishing it on github.
+
+
