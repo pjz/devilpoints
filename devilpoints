@@ -220,6 +220,29 @@ def players(*inputfiles):
     for player, plays in sorted_bykey(allplayers):
         print(playerfmt.format(plays, player))
 
+@command(usage=('%name PLAYERNAME INPUTFILES'))
+def player(playername, *inputfiles):
+    '''Show all the games played by a particular player
+    '''
+
+    input = process_or_error(inputfiles)
+
+    plays = {}
+    total = 0
+    for game, players in input:
+        if playername in players:
+            plays[game] = plays.get(game,0) + 1
+            total += 1
+
+    headermsg = '{0} played {1} plays of {2} unique games.\n'
+    print(headermsg.format(playername, total, len(plays)))
+
+    maxplaysstrlen = len(str(max(plays.values())))
+    gamefmt = "{0:>" + str(maxplaysstrlen) + "} {1}"
+    gamelist = sorted_by_subentry(plays.items(), [1, 0])
+    for game, plays in gamelist:
+        print(gamefmt.format(plays, game))
+
 
 @command(usage=('%name NEWFILE OLDFILES...'))
 def new_players(newfile, *oldfiles):
