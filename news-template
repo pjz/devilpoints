@@ -1,0 +1,27 @@
+
+  {num_players} players played {num_plays} games!
+
+  < General News - turnout, say hi to new people >
+
+  Here's what we played:
+
+{game_stats}
+
+  < comments on games played - good, bad, fun, etc >
+
+{rankings}
+
+  < devil declaration >
+
+  < general news about next meeting time and other upcoming events of possible interest>
+
+
+See you next time!
+
+  --Your friendly gamegroup host
+
+As always:
+
+  Source code to generate the rankings and graph is at 
+    <http://github.com/pjz/devilpoints>
+

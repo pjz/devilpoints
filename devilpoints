@@ -1,9 +1,10 @@
-#!/bin/python
+#!/usr/bin/python
 
 from __future__ import print_function
 
 import sys
 import math
+import StringIO
 
 from opster import command, dispatch
 
@@ -88,7 +89,6 @@ def load_files(inputfiles, incfmt='.'):
     """
     input = []
     for inputfile in inputfiles:
-        debug(lambda : "Loading file '{0}'".format(inputfile))
         print(incfmt.format(inputfile),end='')
         inputtext = "".join(open(inputfile).readlines())
         input += eval(inputtext)
@@ -219,6 +219,7 @@ def players(*inputfiles):
 
     for player, plays in sorted_bykey(allplayers):
         print(playerfmt.format(plays, player))
+
 
 @command(usage=('%name PLAYERNAME INPUTFILES'))
 def player(playername, *inputfiles):
@@ -370,6 +371,38 @@ def graph(*inputfiles):
             print(' "{0}"->"{1}" ;'.format(winner, loser))
 
     print("}")
+
+def get_stdout_of(f):
+    realstdout = sys.stdout
+    sys.stdout = StringIO.StringIO()
+    f()
+    retval = sys.stdout.getvalue()
+    sys.stdout = realstdout
+    return retval
+
+@command(usage=('%name template TEMPLATE INPUTFILES'))
+def template(templatefile, *inputfiles):
+    '''Fill out a template
+
+    Fill out the specified template with the scoring from the specified inputfiles
+    '''
+
+    input = process_or_error(inputfiles,"# Processing {0}...\n")
+
+    rank, win, plays, wins = compute_newstyle_devilpoints(input)
+
+    game_info = get_stdout_of( lambda : print_all_games(input) )
+    rank_info = get_stdout_of( lambda : print_devil_rankings(rank, win, plays, wins) )
+
+    vals = {
+        'num_players': len(rank),
+        'num_plays': len(input),
+        'game_stats': game_info,
+        'rankings' : rank_info,
+    } 
+
+    for line in open(templatefile, 'r'):
+        print(line.strip('\n\r').format(**vals))
 
 
 if __name__ == '__main__':
