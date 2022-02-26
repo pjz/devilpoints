@@ -8,91 +8,95 @@ import StringIO
 
 from opster import command, dispatch
 
+
 def noop(*args):
     pass
 
+
 def debug(stringfunc):
     result = stringfunc()
-    if type(result) == type(""):
-        result = [ result ]
+    if isinstance(result, str):
+        result = [result]
     for line in result:
-        print("##DEBUG >>> {0}".format(line))
+        print(f"##DEBUG >>> {line}")
 
-debug=noop
+
+debug = noop
+
 
 def compute_newstyle_devilpoints(input):
-    rdp = {} # rank devil points per-player
-    wdp = {} # win devil points per-player
-    plays = {} # number of games played per-player
-    wins = {}  # number of games won per-player
+    rdp = {}    # rank devil points per-player
+    wdp = {}    # win devil points per-player
+    plays = {}  # number of games played per-player
+    wins = {}   # number of games won per-player
     for game, players in input:
-        debug(lambda : repr(players))
+        debug(lambda: repr(players))
         numplayers = len(players)
         winscore = max(players.values())
         for player, score in players.items():
             plays[player] = plays.get(player, 0) + 1
-            aswell = len([ x for x in players.values() if x >= score])
-            aspoor = len([ x for x in players.values() if x <= score])
-            rdp[player] = rdp.get(player, 1.0) * aspoor / aswell 
+            aswell = len([x for x in players.values() if x >= score])
+            aspoor = len([x for x in players.values() if x <= score])
+            rdp[player] = rdp.get(player, 1.0) * aspoor / aswell
             if score != winscore:
                 aswell = numplayers
-                aspoor = len([ x for x in players.values() if x < winscore])
+                aspoor = len([x for x in players.values() if x < winscore])
             else:
                 wins[player] = wins.get(player, 0) + 1
-            wdp[player] = wdp.get(player, 1.0) * aspoor / aswell 
+            wdp[player] = wdp.get(player, 1.0) * aspoor / aswell
     for player in rdp:
-        rdp[player] = math.log(rdp[player]) 
+        rdp[player] = math.log(rdp[player])
         wdp[player] = math.log(wdp[player])
-        wins[player] = wins.get(player, 0) 
+        wins[player] = wins.get(player, 0)
     return rdp, wdp, plays, wins
+
+
+def cmp(a, b):
+    if a < b:
+        return -1
+    if a > b:
+        return 1
+    return 0
 
 
 def sorted_by_subentry(l, entry, mycmp=cmp):
     """sort a list of tuples by their (entry+1)'th entry"""
     def valcmp(x, y):
-        if type(entry) != type([]):
+        if not isinstance(entry, list):
             return mycmp(x[entry], y[entry])
-        else:
-            for i in entry:
-                result = mycmp(x[i], y[i])
-                if result != 0:
-                    return result
-            return 0
+        for i in entry:
+            result = mycmp(x[i], y[i])
+            if result != 0:
+                return result
+        return 0
     c = l[:]
     c.sort(valcmp)
-    return c   
+    return c
 
 
 def sorted_bykey(d, mycmp=cmp):
-   """sort a list of tuples by their 1st entry"""
-   return sorted_by_subentry(d.items(), 0,mycmp=mycmp)
+    """sort a list of tuples by their 1st entry"""
+    return sorted_by_subentry(d.items(), 0, mycmp=mycmp)
 
 
 def sorted_byval(d, mycmp=cmp):
-   """sort a dictionary by its values, return a sorted items() list"""
-   return sorted_by_subentry(d.items(), 1, mycmp=mycmp)
-
-
-def reversed(l):
-    """reverse a list"""
-    c = l[:]
-    c.reverse()
-    return c
+    """sort a dictionary by its values, return a sorted items() list"""
+    return sorted_by_subentry(d.items(), 1, mycmp=mycmp)
 
 
 def load_files(inputfiles, incfmt='.'):
     """Load the specified list of files as input files.
        Input files are python/json declarations of a list
        of tuples, where the first item in the tuple is the name
-       of the game that was played and the second item is a 
+       of the game that was played and the second item is a
        dictionary of { player: devilpoints score, ... }
     """
     input = []
     for inputfile in inputfiles:
-        print(incfmt.format(inputfile),end='')
+        print(incfmt.format(inputfile), end='')
         inputtext = "".join(open(inputfile).readlines())
         input += eval(inputtext)
-    debug(lambda : "input:\n{0!r}".format(input))
+    debug(lambda: "input:\n{0!r}".format(input))
     return input
 
 
@@ -104,51 +108,51 @@ def print_devil_rankings(rank, win, plays, wins):
     maxnamelen = max([len(entry[0]) for entry in rank])
     namefmt = ">" + str(maxnamelen) + "s"
     maxplayedlen = max([len(str(x)) for x in plays.values()])
-    playedfmt = ">" + str(maxplayedlen) +"d"
+    playedfmt = ">" + str(maxplayedlen) + "d"
     fmtstr = ("{rankscore:> 2.4f} " +
-        "{rankname:" + namefmt + "} " +
-        "({rankplayed:" + playedfmt + "}) " +
-        "{winscore:> 2.4f} " +
-        "{winname:" + namefmt + "} won " +
-        "{winwins:d} of " +
-        "{winplayed:d}. ")
+              "{rankname:" + namefmt + "} " +
+              "({rankplayed:" + playedfmt + "}) " +
+              "{winscore:> 2.4f} " +
+              "{winname:" + namefmt + "} won " +
+              "{winwins:d} of " +
+              "{winplayed:d}. ")
 
-    #10+maxnamelen = 7 + 1 + maxnamelen + 1 + 3 + 1 - 4 
-    print("Rank"," "*(10+maxnamelen),"Win",sep='')
+    # 10+maxnamelen = 7 + 1 + maxnamelen + 1 + 3 + 1 - 4
+    print("Rank", " "*(10+maxnamelen), "Win", sep='')
 
     for i in range(playercount):
         rankname = rank[i][0]
         winname = win[i][0]
         info = {
-            'rankscore' : rank[i][1],
-            'rankname' : rankname,
-            'rankplayed' : plays[rankname],
-            'winscore' : win[i][1],
-            'winname' : winname,
-            'winwins' : wins[winname],
-            'winplayed' : plays[winname]
+            'rankscore': rank[i][1],
+            'rankname': rankname,
+            'rankplayed': plays[rankname],
+            'winscore': win[i][1],
+            'winname': winname,
+            'winwins': wins[winname],
+            'winplayed': plays[winname]
         }
         print(fmtstr.format(**info))
 
 
 def print_all_games(inputdata):
-   maxgamelen = max([len(play[0]) for play in inputdata])
-   gamefmt = "{0:>" + str(maxgamelen) + "s} :: "
-   for game, players in sorted_by_subentry(inputdata, 0):
-       scores = reversed(sorted_byval(players))
-       playerstr = ", ".join([ k+": "+str(v) for k, v in scores ])
-       print(gamefmt.format(game) + playerstr)
+    maxgamelen = max([len(play[0]) for play in inputdata])
+    gamefmt = "{0:>" + str(maxgamelen) + "s} :: "
+    for game, players in sorted_by_subentry(inputdata, 0):
+        scores = reversed(sorted_byval(players))
+        playerstr = ", ".join([f"{k}: {v!s}" for k, v in scores])
+        print(gamefmt.format(game) + playerstr)
 
 
 def process_or_error(inputfiles, msgfmt="Processing {0}...\n"):
     if len(inputfiles) < 1:
         print("Error: at least one input file must be specified.\n")
         sys.exit(1)
-    print(msgfmt.format("+".join(inputfiles)),end='')
-    input = load_files(inputfiles,'')
+    print(msgfmt.format("+".join(inputfiles)), end='')
+    input = load_files(inputfiles, '')
     return input
 
-       
+
 @command(usage=('%name INPUTFILES'))
 def score(*inputfiles):
     '''Compute place and win rankings
@@ -160,7 +164,7 @@ def score(*inputfiles):
 
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
 
-    print("{0} players played {1} games.\n".format(len(rank), len(input)))
+    print(f"{len(rank)} players played {len(input)} games.\n")
     print_all_games(input)
 
     print("\nRankings...")
@@ -179,18 +183,18 @@ def games(*inputfiles):
     plays = {}
     total = 0
     for game, players in input:
-        plays[game] = plays.get(game,0) + 1 
+        plays[game] = plays.get(game, 0) + 1
         total += 1
 
-    print("{0} plays of {1} games:\n".format(total,len(plays)))
-  
-    maxplaystrlen = len(str(max(plays.values()))) 
+    print("{0} plays of {1} games:\n".format(total, len(plays)))
+
+    maxplaystrlen = len(str(max(plays.values())))
     gamefmt = "{0:>" + str(maxplaystrlen) + "} {1}"
-    debug(lambda : "gamefmt = " + gamefmt)
+    debug(lambda: "gamefmt = " + gamefmt)
 
     gamelist = sorted_by_subentry(plays.items(), [1, 0])
     for game, playcount in gamelist:
-        print(gamefmt.format(playcount,game))
+        print(gamefmt.format(playcount, game))
 
 
 @command(usage=('%name INPUTFILES'))
@@ -207,7 +211,7 @@ def players(*inputfiles):
     pg = 0
     for game, players in input:
         for player in players.keys():
-            allplayers[player] = allplayers.get(player,0) + 1
+            allplayers[player] = allplayers.get(player, 0) + 1
             pg += 1
         total += 1
 
@@ -232,7 +236,7 @@ def player(playername, *inputfiles):
     total = 0
     for game, players in input:
         if playername in players:
-            plays[game] = plays.get(game,0) + 1
+            plays[game] = plays.get(game, 0) + 1
             total += 1
 
     headermsg = '{0} played {1} plays of {2} unique games.\n'
@@ -253,8 +257,8 @@ def new_players(newfile, *oldfiles):
     '''
 
     oldinput = process_or_error(oldfiles, "Loading {0}...")
-    print("\nLoading new file",end='')
-    newinput = load_files([newfile],'...\n')
+    print("\nLoading new file", end='')
+    newinput = load_files([newfile], '...\n')
 
     allplayers = set()
     for game, players in oldinput:
@@ -283,11 +287,11 @@ def new_games(newfile, *oldfiles):
     '''
 
     oldinput = process_or_error(oldfiles, "Loading {0}...")
-    print("\nLoading new file",end='')
-    newinput = load_files([newfile],'...\n')
+    print("\nLoading new file", end='')
+    newinput = load_files([newfile], '...\n')
 
-    all = set([ game for game,p in oldinput ])
-    new = set([ game for game,p in newinput if not game in all ])
+    allgames = set([game for game, p in oldinput])
+    new = set([game for game, p in newinput if game not in allgames])
 
     if len(new) == 0:
         print("No new games.")
@@ -304,10 +308,11 @@ def competed(raw, winner, loser):
     '''did winner ever directly play a game with loser?'''
     for game, players in raw:
         if winner in players and loser in players:
-            debug(lambda : "competed({0},{1}) -> True".format(winner,loser))
+            debug(lambda: "competed({0},{1}) -> True".format(winner, loser))
             return True
-    debug(lambda : "competed({0},{1}) -> False".format(winner,loser))
-    return False 
+    debug(lambda: "competed({0},{1}) -> False".format(winner, loser))
+    return False
+
 
 def downstream(d, node):
     '''d is a dictionary of lists
@@ -316,21 +321,23 @@ def downstream(d, node):
          the set of all those nodes' subnodes ad infinitum
     '''
     result = set(d[node])
-    debug(lambda : "downstream({0},{1})".format(repr(d), node))
+    debug(lambda: "downstream({0},{1})".format(repr(d), node))
     for n in d[node]:
         result.update(downstream(d, n))
-        debug(lambda : " => " + repr(result)) 
+        debug(lambda: " => " + repr(result))
     return result
+
 
 def minimize(d):
     '''minimized directed graph d'''
     # take out direct relationships that could be indirect
     for node in d:
-        allsubs = [ set(downstream(d, n)) for n in d[node] ]
+        allsubs = [set(downstream(d, n)) for n in d[node]]
         allsubs = set([]).union(*allsubs)
-        debug(lambda : "allsubs({0}): {1}".format(node,repr(allsubs)))
+        debug(lambda: "allsubs({0}): {1}".format(node, repr(allsubs)))
         d[node] = set(d[node]).difference(allsubs)
     return d
+
 
 @command(usage=('%name graph INPUTFILES'))
 def graph(*inputfiles):
@@ -339,29 +346,29 @@ def graph(*inputfiles):
     Produce input to feed to graphviz to graph rankings
     '''
 
-    input = process_or_error(inputfiles,"# Processing {0}...\n")
+    input = process_or_error(inputfiles, "# Processing {0}...\n")
 
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
     players = rank.keys()
 
     # construct the directed graph
-    result = dict([(x,[]) for x in players])
+    result = dict([(x, []) for x in players])
     for aplayer in players:
         for bplayer in players:
             status = cmp(rank[aplayer], rank[bplayer]) + \
                      cmp(win[aplayer], win[bplayer])
             if status == 0:
                 continue
-            if status > 0: 
+            if status > 0:
                 winner, loser = aplayer, bplayer
             elif status < 0:
                 winner, loser = bplayer, aplayer
             if loser not in result[winner]:
-                result[winner].append( loser )
+                result[winner].append(loser)
 
     result = minimize(result)
 
-    debug(lambda : "#result: " + repr(result))
+    debug(lambda: "#result: " + repr(result))
 
     # output the graph
     print("digraph A {")
@@ -372,6 +379,7 @@ def graph(*inputfiles):
 
     print("}")
 
+
 def get_stdout_of(f):
     realstdout = sys.stdout
     sys.stdout = StringIO.StringIO()
@@ -380,6 +388,7 @@ def get_stdout_of(f):
     sys.stdout = realstdout
     return retval
 
+
 @command(usage=('%name template TEMPLATE INPUTFILES'))
 def template(templatefile, *inputfiles):
     '''Fill out a template
@@ -387,19 +396,19 @@ def template(templatefile, *inputfiles):
     Fill out the specified template with the scoring from the specified inputfiles
     '''
 
-    input = process_or_error(inputfiles,"# Processing {0}...\n")
+    input = process_or_error(inputfiles, "# Processing {0}...\n")
 
     rank, win, plays, wins = compute_newstyle_devilpoints(input)
 
-    game_info = get_stdout_of( lambda : print_all_games(input) )
-    rank_info = get_stdout_of( lambda : print_devil_rankings(rank, win, plays, wins) )
+    game_info = get_stdout_of(lambda: print_all_games(input))
+    rank_info = get_stdout_of(lambda: print_devil_rankings(rank, win, plays, wins))
 
     vals = {
         'num_players': len(rank),
         'num_plays': len(input),
         'game_stats': game_info,
-        'rankings' : rank_info,
-    } 
+        'rankings': rank_info,
+    }
 
     for line in open(templatefile, 'r'):
         print(line.strip('\n\r').format(**vals))
